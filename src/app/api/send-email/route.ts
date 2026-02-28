@@ -127,6 +127,14 @@ export async function POST(request: NextRequest) {
     const stream = new ReadableStream({
       async start(controller) {
         try {
+          // read optional SMTP username/password from form data (client-provided)
+          const smtpUser = formData.get("smtpUser") as string | null;
+          const smtpPass = formData.get("smtpPass") as string | null;
+
+          const smtpOptions: any = {};
+          if (smtpUser) smtpOptions.user = smtpUser;
+          if (smtpPass) smtpOptions.pass = smtpPass;
+
           // per-result callback will push JSON lines
           await sendBulkEmails(
             validRecipients,
@@ -136,7 +144,8 @@ export async function POST(request: NextRequest) {
             (result, sent, tot) => {
               const payload = { type: "result", result, sent, total: tot };
               controller.enqueue(encoder.encode(JSON.stringify(payload) + "\n"));
-            }
+            },
+            smtpOptions
           );
 
           // finalize

@@ -2,21 +2,21 @@
 // Nodemailer SMTP transport (server-side only)
 // ============================
 import nodemailer from "nodemailer";
-import type { SendResult, Recipient } from "@/types";
+import type { SendResult, Recipient, SmtpOptions } from "@/types";
 
 /**
  * Create SMTP transporter from environment variables
  */
-function createTransporter() {
-  const host = process.env.SMTP_HOST;
-  const port = Number(process.env.SMTP_PORT) || 587;
-  const secure = process.env.SMTP_SECURE === "true";
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
+function createTransporter(smtpOptions?: SmtpOptions) {
+  const host = smtpOptions?.host || process.env.SMTP_HOST;
+  const port = Number(smtpOptions?.port ?? process.env.SMTP_PORT) || 587;
+  const secure = typeof smtpOptions?.secure === "boolean" ? smtpOptions!.secure : process.env.SMTP_SECURE === "true";
+  const user = smtpOptions?.user || process.env.SMTP_USER;
+  const pass = smtpOptions?.pass || process.env.SMTP_PASS;
 
   if (!host || !user || !pass) {
     throw new Error(
-      "SMTP credentials are not configured. Check your .env.local file."
+      "SMTP credentials are not configured. Provide SMTP host/user/pass or set environment variables."
     );
   }
 
@@ -40,14 +40,15 @@ async function sendSingleEmail(
   to: string,
   subject: string,
   htmlBody: string,
-  attachment?: { filename: string; content: Buffer; contentType: string }
+  attachment?: { filename: string; content: Buffer; contentType: string },
+  senderEmail?: string
 ): Promise<SendResult> {
   try {
     const senderName = process.env.SENDER_NAME || "Cold Mail";
-    const senderEmail = process.env.SMTP_USER;
+    const resolvedSender = senderEmail || process.env.SMTP_USER;
 
     const mailOptions: nodemailer.SendMailOptions = {
-      from: `"${senderName}" <${senderEmail}>`,
+      from: `"${senderName}" <${resolvedSender}>`,
       to,
       subject,
       html: htmlBody,
@@ -82,9 +83,10 @@ export async function sendBulkEmails(
   // attachment applies to all recipients
   attachment?: { filename: string; content: Buffer; contentType: string },
   onProgress?: (sent: number, total: number) => void,
-  onResult?: (result: SendResult, sent: number, total: number) => void
+  onResult?: (result: SendResult, sent: number, total: number) => void,
+  smtpOptions?: SmtpOptions
 ): Promise<SendResult[]> {
-  const transporter = createTransporter();
+  const transporter = createTransporter(smtpOptions);
 
   // Verify SMTP connection
   try {
@@ -97,13 +99,15 @@ export async function sendBulkEmails(
   const batchDelay = Number(process.env.BATCH_DELAY) || 2000;
   const results: SendResult[] = [];
 
+  const senderEmail = smtpOptions?.user || process.env.SMTP_USER;
+
   for (let i = 0; i < recipients.length; i += batchSize) {
     const batch = recipients.slice(i, i + batchSize);
 
     // send emails in the batch sequentially to provide accurate per-email status
     for (const r of batch) {
       try {
-        const res = await sendSingleEmail(transporter, r.email, subject, r.body, attachment);
+        const res = await sendSingleEmail(transporter, r.email, subject, r.body, attachment, senderEmail);
         results.push(res);
         if (onResult) {
           try { onResult(res, results.length, recipients.length); } catch (e) {}

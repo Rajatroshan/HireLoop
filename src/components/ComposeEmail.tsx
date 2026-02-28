@@ -36,6 +36,8 @@ const INITIAL_STATE: ComposeFormState = {
   previewRecipients: [],
   parsedRows: [],
   totalExcelRows: 0,
+  smtpUser: "",
+  smtpPass: "",
 };
 
 export default function ComposeEmail() {
@@ -189,6 +191,10 @@ export default function ComposeEmail() {
       if (form.attachment) {
         formData.append("attachment", form.attachment);
       }
+
+      // include optional SMTP username/password only (client-provided)
+      if (form.smtpUser) formData.append("smtpUser", form.smtpUser);
+      if (form.smtpPass) formData.append("smtpPass", form.smtpPass);
 
       const response = await fetch("/api/send-email", {
         method: "POST",
@@ -476,6 +482,29 @@ export default function ComposeEmail() {
                     </p>
                   </div>
                 )}
+
+                {/* SMTP Credentials (optional) */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 space-y-3">
+                  <h4 className="text-sm font-semibold text-gmail-text">SMTP Credentials (optional)</h4>
+                  <p className="text-xs text-gmail-text-secondary">Provide SMTP username and password to send using your SMTP account. Host/port/secure will use server configuration.</p>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      placeholder="SMTP Username"
+                      value={form.smtpUser || ""}
+                      onChange={(e) => updateField("smtpUser", e.target.value)}
+                      className="px-3 py-2 text-sm border rounded-lg outline-none"
+                    />
+
+                    <input
+                      placeholder="SMTP Password"
+                      type="password"
+                      value={form.smtpPass || ""}
+                      onChange={(e) => updateField("smtpPass", e.target.value)}
+                      className="px-3 py-2 text-sm border rounded-lg outline-none"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Preview Table */}

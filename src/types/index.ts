@@ -49,10 +49,20 @@ export interface ComposeFormState {
   previewRecipients: Recipient[];
   parsedRows: Record<string, string>[];
   totalExcelRows: number;
+  smtpUser?: string;
+  smtpPass?: string;
 }
 
 export interface Recipient {
   email: string;
   body: string; // rendered HTML body for this recipient
   rowIndex?: number; // 1-based row index when from excel
+}
+
+export interface SmtpOptions {
+  host?: string;
+  port?: number;
+  secure?: boolean;
+  user?: string;
+  pass?: string;
 }
