@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================
+   Global Styles
+   ============================ */
+
+body {
+  @apply bg-gmail-bg text-gmail-text antialiased;
+  font-family:
+    "Google Sans", "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+/* ============================
+   Quill Editor Overrides
+   ============================ */
+
+.rich-text-editor .ql-container {
+  @apply border-gmail-border rounded-b-lg;
+  min-height: 200px;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.rich-text-editor .ql-toolbar {
+  @apply border-gmail-border rounded-t-lg bg-gray-50;
+}
+
+.rich-text-editor .ql-toolbar .ql-stroke {
+  stroke: #5f6368;
+}
+
+.rich-text-editor .ql-toolbar .ql-fill {
+  fill: #5f6368;
+}
+
+.rich-text-editor .ql-toolbar button:hover .ql-stroke {
+  stroke: #1a73e8;
+}
+
+.rich-text-editor .ql-toolbar button:hover .ql-fill {
+  fill: #1a73e8;
+}
+
+.rich-text-editor .ql-toolbar button.ql-active .ql-stroke {
+  stroke: #1a73e8;
+}
+
+.rich-text-editor .ql-toolbar button.ql-active .ql-fill {
+  fill: #1a73e8;
+}
+
+.rich-text-editor .ql-editor {
+  @apply text-gmail-text;
+  min-height: 200px;
+  line-height: 1.6;
+}
+
+.rich-text-editor .ql-editor.ql-blank::before {
+  @apply text-gmail-text-secondary;
+  font-style: normal;
+}
+
+/* ============================
+   Custom Scrollbar
+   ============================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
+}
+
+/* ============================
+   Animations
+   ============================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* ============================
+   Number Input Arrows
+   ============================ */
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+}
